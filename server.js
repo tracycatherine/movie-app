@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
-const db = require('./firebase'); // 👈 Cloud database
+const db = require('./firebase'); // 👈 In-memory database
 
 const app = express();
 app.use(cors());
@@ -35,7 +35,7 @@ app.get('/search', async (req, res) => {
 app.post('/watchlist', async (req, res) => {
     try {
         const movie = req.body;
-        await db.collection('watchlist').add(movie);
+        await db.collection('watchlist').insertOne(movie);
         res.send("Movie added!");
     } catch (error) {
         res.status(500).send(error.message);
@@ -46,13 +46,7 @@ app.post('/watchlist', async (req, res) => {
 // 📖 Get Movies
 app.get('/watchlist', async (req, res) => {
     try {
-        const snapshot = await db.collection('watchlist').get();
-        let movies = [];
-
-        snapshot.forEach(doc => {
-            movies.push({ id: doc.id, ...doc.data() });
-        });
-
+        const movies = await db.collection('watchlist').find().toArray();
         res.json(movies);
     } catch (error) {
         res.status(500).send(error.message);
@@ -63,7 +57,7 @@ app.get('/watchlist', async (req, res) => {
 // ❌ Delete Movie
 app.delete('/watchlist/:id', async (req, res) => {
     try {
-        await db.collection('watchlist').doc(req.params.id).delete();
+        await db.collection('watchlist').deleteOne({ _id: parseInt(req.params.id) });
         res.send("Movie deleted!");
     } catch (error) {
         res.status(500).send(error.message);
@@ -74,7 +68,7 @@ app.delete('/watchlist/:id', async (req, res) => {
 // ✏️ Update Movie (Favorite)
 app.put('/watchlist/:id', async (req, res) => {
     try {
-        await db.collection('watchlist').doc(req.params.id).update(req.body);
+        await db.collection('watchlist').updateOne({ _id: parseInt(req.params.id) }, { $set: req.body });
         res.send("Movie updated!");
     } catch (error) {
         res.status(500).send(error.message);

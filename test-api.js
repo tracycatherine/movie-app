@@ -17,25 +17,25 @@ async function run() {
     const getRes = await axios.get(`${base}/watchlist`);
     console.log('GET status:', getRes.status, 'total items:', getRes.data.length);
     const item = getRes.data.find(m => m.title === 'Inception' && m.year === '2010');
-    console.log(item ? 'FOUND item id=' + item.id : 'INCEPTION not found');
+    console.log(item ? 'FOUND item id=' + item._id : 'INCEPTION not found');
     if (!item) return;
 
     console.log('\n--- WATCHLIST PUT ---');
-    const putRes = await axios.put(`${base}/watchlist/${item.id}`, { favorite: true });
+    const putRes = await axios.put(`${base}/watchlist/${item._id}`, { favorite: true });
     console.log('PUT status:', putRes.status, 'body:', putRes.data);
 
     console.log('\n--- WATCHLIST GET AFTER UPDATE ---');
     const getRes2 = await axios.get(`${base}/watchlist`);
-    const updated = getRes2.data.find(m => m.id === item.id);
+    const updated = getRes2.data.find(m => m._id === item._id);
     console.log('UPDATED favorite value:', updated?.favorite);
 
     console.log('\n--- WATCHLIST DELETE ---');
-    const deleteRes = await axios.delete(`${base}/watchlist/${item.id}`);
+    const deleteRes = await axios.delete(`${base}/watchlist/${item._id}`);
     console.log('DELETE status:', deleteRes.status, 'body:', deleteRes.data);
 
     console.log('\n--- WATCHLIST GET AFTER DELETE ---');
     const getRes3 = await axios.get(`${base}/watchlist`);
-    const still = getRes3.data.find(m => m.id === item.id);
+    const still = getRes3.data.find(m => m._id === item._id);
     console.log(still ? 'Item still exists' : 'Item removed');
   } catch (err) {
     console.error('ERROR', err.response ? err.response.status : err.code, err.response ? err.response.data : err.message);
